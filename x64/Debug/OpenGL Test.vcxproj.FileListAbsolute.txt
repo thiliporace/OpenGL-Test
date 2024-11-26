@@ -1,0 +1,2 @@
+E:\OpenGL Test\x64\Debug\OpenGL Test.exe
+E:\OpenGL-Test\x64\Debug\OpenGL Test.exe
