@@ -2,8 +2,13 @@
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 	glViewport(0, 0, width, height);
+}
+
+void processInput(GLFWwindow* window) {
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true);
 }
 
 int main() {
@@ -51,6 +56,17 @@ int main() {
 	
 	//Nao queremos que a aplicacao rode a imagem e feche na hora, entao vamos criar um render loop, que roda ate que o GLFW seja dito pra parar
 	while (!glfwWindowShouldClose(window)) {
+
+		//INPUT
+		//Se detectar a tecla ESC, fecha a janela
+		processInput(window);
+
+		//RENDERIZACAO
+		//Limpa a tela com uma cor de nossa escolha
+		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		//EVENTOS
 		//Mais explicacao no functions.md
 		//Troca o back buffer pelo front buffer
 		glfwSwapBuffers(window);
