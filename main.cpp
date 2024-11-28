@@ -2,135 +2,64 @@
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 
-//Codigo fonte Vertex Shader
-const char* vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPos; \n"
-"void main()\n"
-"{\n"
-"gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-"}\n\0";
-
-//Codigo fonte Fragment Shader
-const char* fragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor; \n"
-"void main()\n"
-"{\n"
-"FragColor = vec4(0.8f, 0.3f, 0.02f, 1.0);\n"
-"}\n\0";
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+	glViewport(0, 0, width, height);
+}
 
 int main() {
+	//Inicializa GLFW
 	glfwInit();
-
-	//Diz qual versao do OpenGL o GLFW vai usar
+	//Configura o GLFW, primeiro argumento diz qual opcao pra configurar, segundo argumento e um INT que representa o valor da config
+	//Usamos pra definir a versao usada do OpenGL
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-
-	//Diz qual perfil o GLFW vai usar
+	//Usar o core profile diz pro GLFW que vamos acessar apenas features atuais do OpenGL
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	//Coordenadas dos vertices
-	GLfloat vertices[] = {
-		-0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, //Esquerda baixo
-		0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, //Direita baixo
-		0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f //Meio em cima
-	};
 
-	//Criar a janela com tamanho 800 por 800
-	GLFWwindow* window = glfwCreateWindow(800, 800, "OpenGL Test", NULL, NULL);
+	//Cria a janela com width e height colocados nos primeiros 2 args, com titulo no 3 arg
+	GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+
+	//Retorna se a janela nao foi criada
 	if (window == NULL) {
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
 		return -1;
 	}
-
-	//Diz que vamos usar a janela e introduz ela no contexto atual
+	//Diz pro GLFW fazer com que a janela seja o contexto principal na thread atual
 	glfwMakeContextCurrent(window);
 
-	//Diz pro glad carregar as configuracoes do opengl e da janela
-	gladLoadGL();
+
+	//Precisamos inicializar o GLAD antes de chamar qualquer funcao OpenGL
+	//Pega as funcoes especificas do OS pra serem carregadas
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+		std::cout << "Failed to initialize GLAD" << std::endl;
+		return -1;
+	}
+
+
+	//Precisamos dizer pro OpenGL o tamanho da janela de renderizacao pra ele mostrar os dados e coordenadas em relacao a janela
+	//Note that processed coordinates in OpenGL are between -1 and 1 so we effectively map from the range(-1 to 1) to (0, 800) and (0, 800).
 	glViewport(0, 0, 800, 800);
 
-	//Cria Vertex Shader Object e pega sua referencia
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	//Conecta o Vertex Shader source com o Vertex Shader Object
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	//Compila o Vertex Shader em codigo de maquina
-	glCompileShader(vertexShader);
+	//Toda vez que o usuario redimensionar a tela o viewport tambem vai ser ajustado por essa funcao
+	void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
-	//Cria Fragment Shader Object e pega sua referencia
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	//Conecta Fragment Shader source no Fragment Shader Object
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	//Compila o Fragment Shader em codigo de maquina
-	glCompileShader(fragmentShader);
+	//Precisamos dizer pro GLFW chamar essa funcao quando a janela for redimensionada
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	//Cria Shader Program Object e pega sua referencia
-	GLuint shaderProgram = glCreateProgram();
-	//Conecta o Vertex e o Fragment shader no Shader Program
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	//Linka todos os shaders no Shader Program
-	glLinkProgram(shaderProgram);
-
-	//Deleta os shaders pois nao sao mais necessarios
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-
-	//Cria referencia pro Vertex Array Object e Vertex Buffer Object
-	GLuint VAO, VBO;
-
-	//Gera o VAO e VBO com apenas um objeto cada
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-
-	//Faz o VAO o Vertex Array Object atual bindando ele
-	glBindVertexArray(VAO);
-
-	//Binda o VBO especificando que e um GL_ARRAY_BUFFER
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	//Introduz os vertices no VBO
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	//Configura o Vertex Attribute para que o OpenGL saiba como ler o VBO
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	//Liga o Vertex Attribute pra que o OpenGL saiba como usar ele
-	glEnableVertexAttribArray(0);
-
-	//Binda o VBO e VAO pra 0 pra que a gente nao acidentalmente modifique eles
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-
-
-	//Diz pro opengl preparar para trocar a cor do buffer
-	glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	//Troca o back buffer (onde a cor foi criada) pelo front buffer
-	glfwSwapBuffers(window);
-
-	//While usado pra manter a janela aberta
+	
+	//Nao queremos que a aplicacao rode a imagem e feche na hora, entao vamos criar um render loop, que roda ate que o GLFW seja dito pra parar
 	while (!glfwWindowShouldClose(window)) {
-
-		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		//Diz pro OpenGL qual Shader Program queremos usar
-		glUseProgram(shaderProgram);
-		//Conecta o VAO pro OpenGL saber como usar ele
-		glBindVertexArray(VAO);
-		//Desenha o triangulo usando a primitiva GL_TRIANGLES 
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		//Mais explicacao no functions.md
+		//Troca o back buffer pelo front buffer
 		glfwSwapBuffers(window);
 
-		//Diz pro glfw pra processar todos os eventos (como redimensionar a janela e mexer nela)
+		//Checa se eventos foram acionados (input de teclado ou mouse) e atualiza a janela
 		glfwPollEvents();
 	}
 
-	//Deleta todos os objetos criados
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteProgram(shaderProgram);
-
-	glfwDestroyWindow(window);
+	//Ao sair do render loop precisamos limpar todos os recursos GLFW que foram alocados
 	glfwTerminate();
 	return 0;
 }
