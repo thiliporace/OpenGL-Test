@@ -1,18 +1,19 @@
 #include<iostream>
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
+#include "main_functions.h"
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow* window) {
+static void processInput(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 }
 
 //Checa se a compilacao do glCompileShader teve sucesso
-void checkShaderErrors(unsigned int shader) {
+static void checkShaderErrors(unsigned int shader) {
 	int success;
 	char infoLog[512];
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
@@ -24,7 +25,7 @@ void checkShaderErrors(unsigned int shader) {
 }
 
 //Checa se a linkagem do shaderProgram deu certo
-void checkShaderProgramErrors(unsigned int shaderProgram) {
+static void checkShaderProgramErrors(unsigned int shaderProgram) {
 	int success;
 	char infoLog[512];
 	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
@@ -37,7 +38,7 @@ void checkShaderProgramErrors(unsigned int shaderProgram) {
 
 //Precisamos escrever o vertex shader na linguagem de shader GLSL. Embaixo esta o codigo fonte de um vertex shader basico em GLSL
 //Especificamos a versao do OpenGL (3.3) e escolhemos o perfil core
-const char* vertexShaderSource = "#version 330 core\n"
+static const char* vertexShaderSource = "#version 330 core\n"
 //Atributo do vertice, recebe um vec3 pra sua posicao como entrada
 "layout (location = 0) in vec3 aPos;\n"
 "void main()\n"
@@ -46,7 +47,7 @@ const char* vertexShaderSource = "#version 330 core\n"
 " gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
 "}\0";
 
-const char* fragmentShaderSource = "#version 330 core\n"
+static const char* fragmentShaderSource = "#version 330 core\n"
 //Variavel de output que define a cor final
 "out vec4 FragColor;\n"
 "void main()\n"
@@ -54,7 +55,7 @@ const char* fragmentShaderSource = "#version 330 core\n"
 "FragColor = vec4(0.8f, 0.3f, 0.02f, 1.0f);\n"
 "}\n\0";
 
-int main() {
+int hello_triangle() {
 
 	//Coordenadas 3D normalizadas (range de -1 a 1) dos vertices do triangulo
 	float vertices[] = {
